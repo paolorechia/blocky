@@ -1,65 +1,24 @@
 use log::info;
 use yew::prelude::*;
+use web_sys::HtmlTextAreaElement;
 
 #[function_component]
 pub fn Block() -> Html {
-
-    let caret = use_state(|| 0);
     let state_string: UseStateHandle<String> = use_state(|| String::from(""));
 
-
-    let keypress = {
-        let caret = caret.clone();
+    let onchange_handler = {
         let new_state_string = state_string.clone();
 
-        Callback::from(move | e: KeyboardEvent| {
-            info!("Key {:?}", e.key());
-            info!("Code {:?}", e.code());
-            info!("Alt {:?}", e.alt_key());
-            info!("Ctrl {:?}", e.ctrl_key());
-            info!("Shift {:?}", e.shift_key());
-            info!("Meta {:?}", e.meta_key());
-            // Ignore characters
-            
-            if e.key() == "Control" || e.key() == "Shift" || e.key() == "Meta" {
-                return
-            }
-            else if e.key() == "ArrowLeft" {
-                if *caret > 0 {
-                    caret.set(*caret -1);
-                }
-                return
-            } else if e.key() == "ArrowRight" {
-                let len = new_state_string.len();
-                if *caret < len {
-                    caret.set(*caret +1);
-                }
-                return
-            }
-            
-            else if e.key() == "Backspace" {
-                info!("Detected backpace");
-                let mut string = new_state_string.to_string();
-                string.pop();
-                new_state_string.set(string);
-                caret.set(*caret -1);
-                return
-            } else {
-                let formatted_str = format!("{}{}", *(new_state_string.clone()), e.key());
-
-                let string = formatted_str.to_string();
-
-                caret.set(*caret + 1);
-                new_state_string.set(string);
-            }
+        Callback::from(move | e:InputEvent| {
+            let input: HtmlTextAreaElement = e.target_unchecked_into();
+            let val = input.value();
+            new_state_string.set(val);
         })
     };
-    info!(" Hello??");
     let string_copy = (*state_string).clone();
     html! {
         <main>
-            <textarea onkeydown={keypress.clone()}></textarea>
-            <div>{"Your caret is "}{*caret} </div>
+            <textarea oninput={onchange_handler.clone()}></textarea>
             <div> {"You've typed: "}{string_copy} </div>
         </main>
     }
