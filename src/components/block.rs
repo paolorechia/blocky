@@ -12,6 +12,12 @@ pub fn Block() -> Html {
         let new_is_typing_command = is_typing_command.clone();
         let new_command_buffer = command_buffer.clone();
         Callback::from(move | e:KeyboardEvent| {
+            // submit command buffer
+            if e.code() == "Enter" && *new_is_typing_command == true {
+                info!("TODO: Should submit command here!");
+                new_is_typing_command.set(false);
+                new_command_buffer.set(String::from(""));
+            }
             // start command buffer
             if e.code() == "Slash" && *new_is_typing_command == false {
                 info!("Detected slash, should check for command");
