@@ -7,9 +7,11 @@ pub fn Block() -> Html {
     let caret = use_state(|| 0);
     let state_string: UseStateHandle<String> = use_state(|| String::from(""));
 
+
     let keypress = {
         let caret = caret.clone();
         let new_state_string = state_string.clone();
+
         Callback::from(move | e: KeyboardEvent| {
             info!("Key {:?}", e.key());
             info!("Code {:?}", e.code());
@@ -17,10 +19,39 @@ pub fn Block() -> Html {
             info!("Ctrl {:?}", e.ctrl_key());
             info!("Shift {:?}", e.shift_key());
             info!("Meta {:?}", e.meta_key());
-            let formatted_str = format!("{}{}", *(new_state_string.clone()), e.key());
-            let string = formatted_str.to_string();
-            caret.set(*caret + 1);
-            new_state_string.set(string);
+            // Ignore characters
+            
+            if e.key() == "Control" || e.key() == "Shift" || e.key() == "Meta" {
+                return
+            }
+            else if e.key() == "ArrowLeft" {
+                if *caret > 0 {
+                    caret.set(*caret -1);
+                }
+                return
+            } else if e.key() == "ArrowRight" {
+                let len = new_state_string.len();
+                if *caret < len {
+                    caret.set(*caret +1);
+                }
+                return
+            }
+            
+            else if e.key() == "Backspace" {
+                info!("Detected backpace");
+                let mut string = new_state_string.to_string();
+                string.pop();
+                new_state_string.set(string);
+                caret.set(*caret -1);
+                return
+            } else {
+                let formatted_str = format!("{}{}", *(new_state_string.clone()), e.key());
+
+                let string = formatted_str.to_string();
+
+                caret.set(*caret + 1);
+                new_state_string.set(string);
+            }
         })
     };
     info!(" Hello??");
