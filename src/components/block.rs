@@ -12,19 +12,42 @@ pub fn Block() -> Html {
         let new_is_typing_command = is_typing_command.clone();
         let new_command_buffer = command_buffer.clone();
         Callback::from(move | e:KeyboardEvent| {
-            if e.code() == "Slash" {
+            // start command buffer
+            if e.code() == "Slash" && *new_is_typing_command == false {
                 info!("Detected slash, should check for command");
                 new_is_typing_command.set(true);
                 e.prevent_default();
+                let new_command = format!("{}{}", *new_command_buffer, e.key());
+                let new_command = new_command.to_string();
+                new_command_buffer.set(new_command);
+                return
             }
-
+            // handle command buffer
             if *new_is_typing_command == true {
                 e.prevent_default();
                 if e.code() == "Escape" {
                     info!("Detected escape, should cancel command");
                     new_is_typing_command.set(false);
                     new_command_buffer.set(String::from(""));
-                };
+                }
+                else if e.code() == "Backspace" {
+                    let mut new_command = format!("{}", *new_command_buffer).to_string();
+                    new_command.pop();
+
+                    if new_command.len() == 0 {
+                        new_is_typing_command.set(false);
+                        new_command_buffer.set(String::from(""));
+                    } else {
+                        new_command_buffer.set(new_command);
+                    }
+                }
+                else if (e.which() >= 48 && e.which() <= 57) || (e.which() >= 65 && e.which() <= 90) {
+                    // Digits or lower case letters or slash
+                    info!("Detected letter/digit");
+                    let new_command = format!("{}{}", *new_command_buffer, e.key());
+                    let new_command = new_command.to_string();
+                    new_command_buffer.set(new_command);
+                }
             }
         })
     };
@@ -35,21 +58,11 @@ pub fn Block() -> Html {
         let new_is_typing_command = is_typing_command.clone();
 
         Callback::from(move | e:KeyboardEvent| {
-            if *new_is_typing_command == true {
-                // Digits or lower case letters
-                if (e.which() >= 48 && e.which() <= 57) || (e.which() >= 65 && e.which() <= 90) {
-                    info!("Detected letter/digit");
-                    let new_command = format!("{}{}", *new_command_buffer, e.key());
-                    let new_command = new_command.to_string();
-                    new_command_buffer.set(new_command);
-                }
-            } else {
-                let input: HtmlTextAreaElement = e.target_unchecked_into();
-                let val = input.value();
-                new_state_string.set(val);
-                info!("{:?}", *new_command_buffer);
-                info!("{:?}", *new_is_typing_command);
-            }
+            let input: HtmlTextAreaElement = e.target_unchecked_into();
+            let val = input.value();
+            new_state_string.set(val);
+            info!("{:?}", *new_command_buffer);
+            info!("{:?}", *new_is_typing_command);
         })
     };
     let string_copy = (*state_string).clone();
