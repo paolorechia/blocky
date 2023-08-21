@@ -1,6 +1,9 @@
 # WIP - Experimental Markdown Web Editor
 This is an experimental markdown web editor, built in Rust. Still WIP and nothing yet done, so it's still only an idea.
 
+
+---------
+
 # Yew Trunk Template
 
 This is a fairly minimal template for a Yew app that's built with [Trunk].
